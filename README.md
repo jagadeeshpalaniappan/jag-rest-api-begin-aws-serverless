@@ -1,2 +1,0 @@
-# begin-apollo
-Begin app
