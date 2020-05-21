@@ -1,7 +1,7 @@
 let arc = require("@architect/functions");
 let { ApolloServer, gql } = require("apollo-server-lambda");
 
-const db = require("../../db");
+const db = { authors: [], posts: [] };
 
 let typeDefs = gql`
   type Author {
