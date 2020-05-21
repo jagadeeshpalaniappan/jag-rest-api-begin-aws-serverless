@@ -1,6 +1,8 @@
 let arc = require("@architect/functions");
 let { ApolloServer, gql } = require("apollo-server-lambda");
 
+const db = require("../../db");
+
 let typeDefs = gql`
   type Author {
     id: ID!
@@ -26,57 +28,18 @@ let typeDefs = gql`
   }
 `;
 
-const dbAuthors = [
-  {
-    id: "a1",
-    name: "Author1",
-  },
-  {
-    id: "a2",
-    name: "Author2",
-  },
-  {
-    id: "a3",
-    name: "Author3",
-  },
-];
-
-const dbPosts = [
-  {
-    id: "p1",
-    title: "Post1",
-    authorId: "a3",
-  },
-  {
-    id: "p2",
-    title: "Post2",
-    authorId: "a1",
-  },
-  {
-    id: "p3",
-    title: "Post3",
-    authorId: "a3",
-  },
-  {
-    id: "p4",
-    title: "Post4",
-    authorId: "a2",
-  },
-];
-
 let resolvers = {
   Query: {
     hello: () => "Hello Jag!",
     authors: () => {
-      console.log(dbAuthors);
-      return dbAuthors.map((author) => {
-        const posts = dbPosts.filter((post) => post.authorId === author.id);
+      return db.authors.map((author) => {
+        const posts = db.posts.filter((post) => post.authorId === author.id);
         return { ...author, posts };
       });
     },
     posts: () => {
-      return dbPosts.map((post) => {
-        const author = dbAuthors.find((author) => author.id === post.authorId);
+      return db.posts.map((post) => {
+        const author = db.authors.find((author) => author.id === post.authorId);
         return { ...post, author };
       });
     },
@@ -84,17 +47,15 @@ let resolvers = {
   Mutation: {
     addAuthor: (parent, args) => {
       const { name } = args;
-      const newAuthor = { id: `a${dbAuthors.length + 1}`, name };
-      dbAuthors.push(newAuthor);
-      console.log(dbAuthors);
+      const newAuthor = { id: `a${db.authors.length + 1}`, name };
+      db.authors.push(newAuthor);
       return newAuthor;
     },
     addPost: (parent, args) => {
       const { title, authorId } = args;
-      const newPost = { id: `a${dbPosts.length + 1}`, title, authorId };
-      dbPosts.push(newPost);
-      console.log(dbPosts);
-      const author = dbAuthors.find((author) => author.id === authorId);
+      const newPost = { id: `a${db.posts.length + 1}`, title, authorId };
+      db.posts.push(newPost);
+      const author = db.authors.find((author) => author.id === authorId);
       return { ...newPost, author };
     },
   },
