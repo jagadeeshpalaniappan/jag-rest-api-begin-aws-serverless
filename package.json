@@ -1,5 +1,5 @@
 {
-  "name": "begin-app",
+  "name": "jag-api",
   "version": "0.0.0",
   "description": "Begin basic Apollo GraphQL API",
   "scripts": {

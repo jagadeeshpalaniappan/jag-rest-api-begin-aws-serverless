@@ -1,5 +1,5 @@
 {
-  "name": "begin-app-post-graphql",
+  "name": "jag-api-get-gql-api-v1-graphql",
   "dependencies": {
     "@architect/functions": "^3.10.1",
     "apollo-server-lambda": "^2.11.0",
