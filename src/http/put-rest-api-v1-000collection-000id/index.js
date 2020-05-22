@@ -6,7 +6,7 @@ exports.handler = async function post(req) {
   let body = arc.http.helpers.bodyParser(req); // Base64 decodes + parses body
   body.created = body.created || Date.now();
   body.completed = !!body.completed;
-  const data = await db.addItem({ collection, item: body });
+  const data = await db.updateItem({ collection, id, item: body });
 
   const oneCollection = collection.slice(0, collection.length - 1);
   const resBody = { data: { [oneCollection]: data } };

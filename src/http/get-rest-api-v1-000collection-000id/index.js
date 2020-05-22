@@ -1,8 +1,10 @@
-const db = require("@begin/data");
+let db = require("@architect/shared/db-crud");
 
 exports.handler = async function items(req) {
   const { collection, id } = req.pathParameters;
-  let data = await db.get({ table: collection, key: id });
+  let data = await db.getItem({ collection, id });
+
+  // return oneItem: convert collectionName into singular
   const oneCollection = collection.slice(0, collection.length - 1);
   const resBody = { data: { [oneCollection]: data } };
   return {

@@ -1,9 +1,9 @@
-const db = require("@begin/data");
+let db = require("@architect/shared/db-crud");
 
 exports.handler = async function items(req) {
   console.log();
   const { collection } = req.pathParameters;
-  let data = await db.get({ table: collection });
+  let data = await db.getItems({ collection });
   // Return oldest todo first
   const sortedData = data.sort((a, b) => a.created - b.created);
   return {
