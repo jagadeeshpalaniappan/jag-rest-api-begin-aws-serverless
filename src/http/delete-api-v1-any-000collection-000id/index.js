@@ -1,10 +1,9 @@
-let db = require("@architect/shared/db-crud");
+const db = require("@architect/shared/modules/any/dao");
 
-exports.handler = async function items(req) {
+exports.handler = async function post(req) {
   const { collection, id } = req.pathParameters;
-  let data = await db.getItem({ collection, id });
+  const data = await db.deleteItem({ collection, id });
 
-  // return oneItem: convert collectionName into singular
   const oneCollection = collection.slice(0, collection.length - 1);
   const resBody = { data: { [oneCollection]: data } };
   return {
