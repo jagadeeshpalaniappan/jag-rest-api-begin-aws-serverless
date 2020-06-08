@@ -1,15 +1,12 @@
 let arc = require("@architect/functions");
-let db = require("@architect/shared/db-crud");
+const db = require("@architect/shared/modules/any/dao");
 
 exports.handler = async function post(req) {
   const { collection, id } = req.pathParameters;
   let body = arc.http.helpers.bodyParser(req); // Base64 decodes + parses body
-  body.created = body.created || Date.now();
-  body.completed = !!body.completed;
-  const data = await db.addItem({ collection, item: body });
+  const data = await db.updateItem({ collection, id, item: body });
 
-  const oneCollection = collection.slice(0, collection.length - 1);
-  const resBody = { data: { [oneCollection]: data } };
+  const resBody = { data: { [collection]: data } };
   return {
     statusCode: 200,
     headers: {

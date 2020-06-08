@@ -2,14 +2,11 @@
 begin-app
 
 @http
-get /gql/api/v1/graphql
-post /gql/api/v1/graphql
-
-get /rest/api/v1/:collection
-get /rest/api/v1/:collection/:id
-post /rest/api/v1/:collection
-put /rest/api/v1/:collection/:id
-delete /rest/api/v1/:collection/:id
+get /api/v1/any/:collection
+get /api/v1/any/:collection/:id
+post /api/v1/any/:collection
+put /api/v1/any/:collection/:id
+delete /api/v1/any/:collection/:id
 
 
 @tables
