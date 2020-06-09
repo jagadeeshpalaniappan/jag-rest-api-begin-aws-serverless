@@ -10,6 +10,7 @@
     "@architect/sandbox": "latest",
     "@begin/data": "latest",
     "cross-env": "^7.0.2",
+    "faunadb": "^2.14.2",
     "tap-spec": "^5.0.0",
     "tape": "^5.0.0",
     "tiny-json-http": "^7.2.0"

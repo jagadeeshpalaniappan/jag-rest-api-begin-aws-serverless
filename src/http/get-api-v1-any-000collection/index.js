@@ -2,12 +2,12 @@ const db = require("@architect/shared/modules/any/dao");
 
 exports.handler = async function items(req) {
   const { collection } = req.pathParameters;
-  const { limit, cursor } = req.queryStringParameters || {};
+  const { limit, cursor, before, after } = req.queryStringParameters || {};
   console.log(`GET: /v1/${collection}`);
-  console.log({ limit, cursor });
+  console.log({ limit, cursor, before, after });
 
   // let data = await db.getItems({ collection });
-  let data = await db.getItemsPagination({ collection, limit, cursor });
+  let data = await db.getItemsPagination({ collection, limit, before, after });
 
   return {
     statusCode: 200,

@@ -2,6 +2,7 @@
   "name": "jag-api-get-rest-api-v1-000collection-000id",
   "dependencies": {
     "@architect/functions": "^3.10.1",
-    "@begin/data": "^1.2.2"
+    "@begin/data": "^1.2.2",
+    "faunadb": "^2.14.2"
   }
 }
