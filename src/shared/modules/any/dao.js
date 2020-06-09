@@ -24,3 +24,6 @@ exports.updateItem = async ({ collection, id, item }) => {
 exports.deleteItem = ({ collection, id }) => {
   return db.deleteItem({ collection, id });
 };
+exports.deleteAllItem = ({ collection }) => {
+  return db.deleteAllItem({ collection });
+};

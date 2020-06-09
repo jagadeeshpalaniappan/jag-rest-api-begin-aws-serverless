@@ -97,7 +97,7 @@ exports.deleteItem = async ({ collection, id }) => {
   return { id: getId(dbItem.ref), ...dbItem.data };
 };
 
-exports.deleteAllItem = async ({ collection, id }) => {
+exports.deleteAllItem = async ({ collection }) => {
   const deleteAllDocQuery = q.Map(
     q.Paginate(q.Match(q.Index("all_users"))),
     q.Lambda("item", q.Delete(q.Var("item")))
