@@ -1,7 +1,7 @@
 const db = require("@begin/data");
 const faunadb = require("faunadb");
 const q = faunadb.query;
-const FAUNADB_ADMIN_SECRET = "fnADtzWlLxACCBddcFrAHX4G66v8Hmpy0U4gVzUy";
+const FAUNADB_ADMIN_SECRET = process.env.FAUNADB_ADMIN_SECRET;
 var fdbClient = new faunadb.Client({ secret: FAUNADB_ADMIN_SECRET });
 
 const { convertKeyToId } = require("../../../utils/common");
