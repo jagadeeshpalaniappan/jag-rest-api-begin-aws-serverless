@@ -2,12 +2,21 @@ const db = require("@architect/shared/modules/any/dao");
 
 exports.handler = async function items(req) {
   const { collection } = req.pathParameters;
-  const { limit, cursor, before, after } = req.queryStringParameters || {};
+  const { search, sort, pageSize, pageCursor, pageBefore, pageAfter } =
+    req.queryStringParameters || {};
   console.log(`GET: /v1/${collection}`);
-  console.log({ limit, cursor, before, after });
+  console.log({ search, sort, pageSize, pageCursor, pageBefore, pageAfter });
 
   // let data = await db.getItems({ collection });
-  let data = await db.getItemsPagination({ collection, limit, before, after });
+  const page = {
+    limit: pageSize,
+    // cursor: pageCursor,  // TODO
+    before: pageBefore,
+    after: pageAfter,
+  };
+  // const input = { search: "Hello", sort: "username", page };
+  const input = { search, sort, page };
+  let data = await db.getItems({ anyCollection: collection, input });
 
   return {
     statusCode: 200,
@@ -16,6 +25,6 @@ exports.handler = async function items(req) {
       "cache-control":
         "no-cache, no-store, must-revalidate, max-age=0, s-maxage=0",
     },
-    body: JSON.stringify({ data: { [collection]: data } }),
+    body: JSON.stringify({ [collection]: data }),
   };
 };
