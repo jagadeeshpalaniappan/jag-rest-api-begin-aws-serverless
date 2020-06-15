@@ -6,7 +6,7 @@ exports.handler = async function items(req) {
 
   // return oneItem: convert collectionName into singular
   const oneCollection = collection.slice(0, collection.length - 1);
-  const resBody = { data: { [oneCollection]: data } };
+  const resBody = { [oneCollection]: data };
   return {
     statusCode: 200,
     headers: {
