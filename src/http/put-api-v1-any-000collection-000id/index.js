@@ -5,8 +5,8 @@ exports.handler = async function post(req) {
   const { collection, id } = req.pathParameters;
   let body = arc.http.helpers.bodyParser(req); // Base64 decodes + parses body
   const data = await db.updateItem({ collection, id, item: body });
-
-  const resBody = { [collection]: data };
+  const oneCollection = collection.slice(0, collection.length - 1);
+  const resBody = { [oneCollection]: data };
   return {
     statusCode: 200,
     headers: {
