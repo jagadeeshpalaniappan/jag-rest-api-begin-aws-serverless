@@ -1,12 +1,12 @@
 // const db = require("./db/dynamodb");
 const db = require("./db/faunadb");
 
-exports.getItems = async ({ collection }) => {
-  return db.getItems({ collection });
-};
+// exports.getItems = async ({ collection }) => {
+//   return db.getItems({ collection });
+// };
 
-exports.getItemsPagination = async (...args) => {
-  return db.getItemsPagination(...args);
+exports.getItems = async (...args) => {
+  return db.getItems(...args);
 };
 
 exports.getItem = async ({ collection, id }) => {

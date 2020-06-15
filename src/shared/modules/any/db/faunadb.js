@@ -1,54 +1,70 @@
 const db = require("@begin/data");
 const faunadb = require("faunadb");
 const q = faunadb.query;
-const FAUNADB_ADMIN_SECRET = process.env.FAUNADB_ADMIN_SECRET;
-var fdbClient = new faunadb.Client({ secret: FAUNADB_ADMIN_SECRET });
+const FAUNADB_SERVER_SECRET = process.env.FAUNADB_SERVER_SECRET;
+var fdbClient = new faunadb.Client({ secret: FAUNADB_SERVER_SECRET });
 
 const { convertKeyToId } = require("../../../utils/common");
-const fdbUtils = require("../../../utils/fdb.utils");
-const { getId } = fdbUtils;
+const {
+  getId,
+  getAnyCollectionConfig,
+  getCursors,
+} = require("../../../utils/fdb.utils");
 
-exports.getItems = async ({ collection }) => {
-  const users = await fdbClient.query(q.CreateCollection({ name: "users" }));
-  console.log("getItems:", users);
-  return users;
+// exports.getItems = async ({ collection }) => {
+//   const users = await fdbClient.query(q.CreateCollection({ name: "users" }));
+//   console.log("getItems:", users);
+//   return users;
+// };
+
+const getItemsFql = ({ anyCollection, input }) => {
+  const { collection, index, pageConfig } = getAnyCollectionConfig({
+    anyCollection,
+    input,
+  });
+
+  console.log("##############");
+  console.log({ collection, index, pageConfig });
+
+  let PageQuery = q.Paginate(q.Match(q.Index(index)), pageConfig);
+  let PageResultsMapFn = q.Lambda(["ref"], q.Get(q.Var("ref")));
+  if (input.search) {
+    const searchKeyword = input.search.toLowerCase();
+    PageQuery = q.Paginate(q.Match(q.Index(index), searchKeyword), pageConfig);
+  }
+  if (input.sort) {
+    PageResultsMapFn = q.Lambda(["x", "ref"], q.Get(q.Var("ref")));
+  }
+  const fql = q.Map(PageQuery, PageResultsMapFn);
+
+  return fql;
 };
 
-exports.getItemsPagination = async ({ collection, limit, before, after }) => {
-  // populate: pageConfig
-  const pageConfig = {};
-  if (limit) pageConfig.size = Number(limit);
-  if (before) pageConfig.before = [q.Ref(q.Collection("users"), before)];
-  if (after) pageConfig.after = [q.Ref(q.Collection("users"), after)];
-  console.log("getItemsPagination: pageConfig", pageConfig);
-
-  // getAllDocQuery: pageObj
-  const getAllDocQuery = q.Map(
-    q.Paginate(q.Match(q.Index("all_users")), pageConfig), // getIndexRef and matchAllRef and getOnlyPagedDocRefs
-    q.Lambda("item", q.Get(q.Var("item"))) // const lamdaFn = (docRefVar) => GetDoc(docRefVar);
-  ); // getOnlyPagedDocRefs and pass eachObj to lamdaFn
-  const pageObj = await fdbClient.query(getAllDocQuery);
-  console.log("getItemsPagination: pageObj", pageObj);
-  // return pageObj;
+exports.getItems = async ({ anyCollection, input }) => {
+  const fql = getItemsFql({ anyCollection, input });
+  const pageObj = await fdbClient.query(fql);
+  console.log("getItems: pageObj", pageObj);
 
   // populate: resp
   const items = pageObj.data.map((item) => ({
     id: getId(item.ref),
     ...item.data,
   }));
-  const beforeId = pageObj.before ? getId(pageObj.before[0]) : null;
-  const afterId = pageObj.after ? getId(pageObj.after[0]) : null;
-  return { data: items, before: beforeId, after: afterId };
+
+  const { before, after } = getCursors(pageObj);
+  console.log({ before, after });
+
+  return { data: items, before, after };
 };
 
 /*
-exports.getItemsPagination = async ({ collection, limit, before, after }) => {
+exports.getItems = async ({ collection, limit, before, after }) => {
   // populate: pageConfig
   const pageConfig = {};
   if (limit) pageConfig.size = Number(limit);
   if (before) pageConfig.before = [q.Ref(q.Collection("users"), before)];
   if (after) pageConfig.after = [q.Ref(q.Collection("users"), after)];
-  // console.log("getItemsPagination: pageConfig", pageConfig);
+  // console.log("getItems: pageConfig", pageConfig);
 
   // getAllDocRefs: pageObj: Query:
   const getAllDocRefsPageQuery = q.Paginate(
@@ -56,12 +72,12 @@ exports.getItemsPagination = async ({ collection, limit, before, after }) => {
     pageConfig
   );
   const docRefsPage = await fdbClient.query(getAllDocRefsPageQuery);
-  // console.log("getItemsPagination: docRefsPage", docRefsPage);
+  // console.log("getItems: docRefsPage", docRefsPage);
 
   // get: eachDocData -byRef:
   const getAllDocDataByRefQuery = docRefsPage.data.map((ref) => q.Get(ref)); // docRefsPageObj.data.map((docRef) => GetDoc(docRef));
   const dbItems = await fdbClient.query(getAllDocDataByRefQuery);
-  // console.log("getItemsPagination: dbItems", dbItems);
+  // console.log("getItems: dbItems", dbItems);
 
   // populate: resp
   const items = dbItems.map((item) => ({ id: getId(item.ref), ...item.data }));
