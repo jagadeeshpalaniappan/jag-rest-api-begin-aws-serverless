@@ -7,6 +7,8 @@ exports.handler = async function items(req) {
   console.log(`GET: /v1/${collection}`);
   console.log({ search, sort, pageSize, pageCursor, pageBefore, pageAfter });
   console.log({ filters });
+  const filtersParsed =
+    filters && filters.length > 0 ? JSON.parse(filters) : null;
 
   // let data = await db.getItems({ collection });
   const page = {
@@ -16,7 +18,7 @@ exports.handler = async function items(req) {
     after: pageAfter,
   };
   // const input = { search: "Hello", sort: "username", page };
-  const input = { search, sort, page, filters };
+  const input = { search, sort, page, filters: filtersParsed };
   let data = await db.getItems({ anyCollection: collection, input });
 
   return {
