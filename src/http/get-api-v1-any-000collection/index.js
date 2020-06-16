@@ -2,10 +2,11 @@ const db = require("@architect/shared/modules/any/dao");
 
 exports.handler = async function items(req) {
   const { collection } = req.pathParameters;
-  const { search, sort, pageSize, pageCursor, pageBefore, pageAfter } =
+  const { search, sort, pageSize, pageCursor, pageBefore, pageAfter, filters } =
     req.queryStringParameters || {};
   console.log(`GET: /v1/${collection}`);
   console.log({ search, sort, pageSize, pageCursor, pageBefore, pageAfter });
+  console.log({ filters });
 
   // let data = await db.getItems({ collection });
   const page = {
@@ -15,7 +16,7 @@ exports.handler = async function items(req) {
     after: pageAfter,
   };
   // const input = { search: "Hello", sort: "username", page };
-  const input = { search, sort, page };
+  const input = { search, sort, page, filters };
   let data = await db.getItems({ anyCollection: collection, input });
 
   return {
