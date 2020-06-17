@@ -17,6 +17,35 @@ const {
 //   return users;
 // };
 
+const getFilterPageQueries = (filters) => {
+  return filters.map((filter) => {
+    const idxName = `users_idx_filterby@${filter.key}`;
+    const PageQuery = q.Match(q.Index(idxName), filter.value);
+    return PageQuery;
+  });
+};
+
+const getItemsAdvFql = ({ anyCollection, input }) => {
+  const { collection, index, pageConfig } = getAnyCollectionConfig({
+    anyCollection,
+    input,
+  });
+  const { filterMap } = input;
+  console.log("##############");
+  console.log({ collection, index, pageConfig });
+  const searchTerms = ["fuzzySearch", "role", "sex", "isActive"];
+  const searchVal = searchTerms.map(
+    (terms) => (filterMap && filterMap[terms]) || "*"
+  );
+  let PageQuery = q.Paginate(q.Match(q.Index(index), searchVal), pageConfig);
+  let PageResultsMapFn = q.Lambda(["ref"], q.Get(q.Var("ref")));
+  if (input.sort) {
+    PageResultsMapFn = q.Lambda(["x", "ref"], q.Get(q.Var("ref")));
+  }
+  const fql = q.Map(PageQuery, PageResultsMapFn);
+  return fql;
+};
+
 const getItemsFql = ({ anyCollection, input }) => {
   const { collection, index, pageConfig } = getAnyCollectionConfig({
     anyCollection,
@@ -26,22 +55,35 @@ const getItemsFql = ({ anyCollection, input }) => {
   console.log("##############");
   console.log({ collection, index, pageConfig });
 
-  let PageQuery = q.Paginate(q.Match(q.Index(index)), pageConfig);
-  let PageResultsMapFn = q.Lambda(["ref"], q.Get(q.Var("ref")));
+  // MATCH-QUERY:
+  let MatchQueries = [];
+  let MatchQuery = q.Match(q.Index(index));
+  // MATCH-QUERY: searchKeyword
   if (input.search) {
     const searchKeyword = input.search.toLowerCase();
-    PageQuery = q.Paginate(q.Match(q.Index(index), searchKeyword), pageConfig);
+    MatchQuery = q.Match(q.Index(index), searchKeyword);
   }
+  MatchQueries.push(MatchQuery);
+  // MATCH-QUERY: filter
+  if (input.filters && input.filters.length > 0) {
+    const FilterPageQueries = getFilterPageQueries(input.filters);
+    MatchQueries = [...MatchQueries, ...FilterPageQueries];
+  }
+
+  console.log("##MatchQueries##");
+  console.log(MatchQueries);
+
+  let PageQuery = q.Paginate(q.Intersection(MatchQueries), pageConfig);
+  let PageResultsMapFn = q.Lambda(["ref"], q.Get(q.Var("ref")));
   if (input.sort) {
     PageResultsMapFn = q.Lambda(["x", "ref"], q.Get(q.Var("ref")));
   }
   const fql = q.Map(PageQuery, PageResultsMapFn);
-
   return fql;
 };
 
 exports.getItems = async ({ anyCollection, input }) => {
-  const fql = getItemsFql({ anyCollection, input });
+  const fql = getItemsAdvFql({ anyCollection, input });
   const pageObj = await fdbClient.query(fql);
   console.log("getItems: pageObj", pageObj);
 

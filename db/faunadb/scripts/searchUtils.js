@@ -15,6 +15,11 @@ function SplitIntoWords(string, delimiter = " ") {
   );
 }
 
+const WILDCARD = "*";
+function GetArrWithWildcard(item) {
+  return [WILDCARD, item];
+}
+
 function GenerateAllStrKeywords(user, searchKeys) {
   const keys =
     searchKeys && searchKeys.length
@@ -33,7 +38,7 @@ function GenerateAllStrKeywords(user, searchKeys) {
     valuesStrOnly,
     q.Lambda("value", SplitIntoWords(q.ToString(q.Var("value"))))
   );
-  return q.Distinct(q.Union(keywordsArr));
+  return q.Distinct(q.Union([WILDCARD], q.Union(keywordsArr)));
 }
 
-module.exports = { GenerateAllStrKeywords, SplitIntoWords };
+module.exports = { GenerateAllStrKeywords, SplitIntoWords, GetArrWithWildcard };

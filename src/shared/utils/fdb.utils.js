@@ -13,18 +13,24 @@ const getId = (ref) => {
 const anyConfig = {
   users: {
     collection: "users",
-    defaultIndex: "users_idx",
-    defaultSearchIndex: "users_idx_searchable",
+    defaultIndex: "users_idx_advsearch",
     sortIndex: {
-      name: "users_idx_sortby@name",
-      username: "users_idx_sortby@username",
-      created: "users_idx_sortby@created",
+      name: "users_idx_advsearch_sortby@name",
+      username: "users_idx_advsearch_sortby@username",
+      created: "users_idx_advsearch_sortby@created",
     },
-    searchAndSortIndex: {
-      name: "users_idx_searchable_sortby@name",
-      username: "users_idx_searchable_sortby@username",
-      created: "users_idx_searchable_sortby@created",
-    },
+
+    // defaultSearchIndex: "users_idx_searchable",
+    // searchAndSortIndex111: {
+    //   name: "users_idx_searchable_sortby@name",
+    //   username: "users_idx_searchable_sortby@username",
+    //   created: "users_idx_searchable_sortby@created",
+    // },
+    // searchAndSortIndex: {
+    //   name: "users_idx_advsearch_sortby@name",
+    //   username: "users_idx_advsearch_sortby@username",
+    //   created: "users_idx_advsearch_sortby@created",
+    // },
   },
 };
 
@@ -85,21 +91,22 @@ const getAnyCollectionConfig = ({ anyCollection, input }) => {
   const config = anyConfig[anyCollection];
 
   const collection = config.collection;
-  let index = config.defaultIndex;
-  let indexConfig = null;
+  // let index = config.defaultIndex;
+  // let indexConfig = null;
 
-  if (search && sort) {
-    indexConfig = config.searchAndSortIndex;
-  } else if (search) {
-    indexConfig = config.defaultSearchIndex;
-  } else if (sort) {
-    indexConfig = config.sortIndex;
-  }
+  // if (search && sort) {
+  //   indexConfig = config.searchAndSortIndex;
+  // } else if (search) {
+  //   indexConfig = config.defaultSearchIndex;
+  // } else if (sort) {
+  //   indexConfig = config.sortIndex;
+  // }
 
-  if (indexConfig) {
-    index = sort ? indexConfig[sort] : indexConfig;
-  }
+  // if (indexConfig) {
+  //   index = sort ? indexConfig[sort] : indexConfig;
+  // }
 
+  const index = sort ? config.sortIndex[sort] : config.defaultIndex;
   const pageConfig = getPageConfig({ input });
   console.log({ input, collection, index, pageConfig });
   return { collection, index, pageConfig };

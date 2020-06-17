@@ -1,5 +1,21 @@
 const db = require("@architect/shared/modules/any/dao");
-
+/* 
+const getMapToArr = (str, skipValues) => {
+  const itemsMap = str && str.length > 0 ? JSON.parse(str) : null;
+  let items = [];
+  if (itemsMap) {
+    const keys = Object.keys(itemsMap);
+    for (let i = 0, len = keys.length; i < len; i++) {
+      const key = keys[i];
+      const value = itemsMap[key];
+      if (!(skipValues && skipValues.has(value))) {
+        items.push({ key, value });
+      }
+    }
+  }
+  return items && items.length > 0 ? items : null;
+};
+ */
 exports.handler = async function items(req) {
   const { collection } = req.pathParameters;
   const { search, sort, pageSize, pageCursor, pageBefore, pageAfter, filters } =
@@ -7,8 +23,8 @@ exports.handler = async function items(req) {
   console.log(`GET: /v1/${collection}`);
   console.log({ search, sort, pageSize, pageCursor, pageBefore, pageAfter });
   console.log({ filters });
-  const filtersParsed =
-    filters && filters.length > 0 ? JSON.parse(filters) : null;
+  // const filtersArr = getMapToArr(filters, new Set(["all"]));
+  const filtersArr = filters ? JSON.parse(filters) : [];
 
   // let data = await db.getItems({ collection });
   const page = {
@@ -17,8 +33,14 @@ exports.handler = async function items(req) {
     before: pageBefore,
     after: pageAfter,
   };
-  // const input = { search: "Hello", sort: "username", page };
-  const input = { search, sort, page, filters: filtersParsed };
+
+  const filterMap = filtersArr.reduce((res, item) => {
+    res[item.key] = item.value;
+    return res;
+  }, {});
+  filterMap.fuzzySearch = search;
+
+  const input = { search, sort, page, filterMap };
   let data = await db.getItems({ anyCollection: collection, input });
 
   return {
